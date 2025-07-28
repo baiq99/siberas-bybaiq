@@ -1,0 +1,10 @@
+streamlit==1.37.1
+opencv-python==4.10.0
+numpy==1.26.4
+pandas==2.2.2
+joblib==1.4.2
+Pillow==10.4.0
+# pathlib (not installed)
+# base64 (not installed)
+scikit-learn==1.6.1
+matplotlib==3.9.2
