@@ -7,6 +7,7 @@ import joblib
 from PIL import Image
 import pathlib
 import base64
+import time
 from collections import OrderedDict 
 
 
@@ -176,19 +177,41 @@ with col_center:
         # Tombol di tengah
         st.markdown("<div class='btn-wrapper'>", unsafe_allow_html=True)
         if st.button("Klasifikasi Gambar"):
+            # --- ukur waktu pemrosesan ---
+            # --- ukur waktu pemrosesan ---
+            t0 = time.perf_counter()
             pred, probs, conf = predict_rice(image)
-            threshold = 44
+            elapsed_s = time.perf_counter() - t0  # hasil dalam detik
+
+            threshold = 44  # persen
             is_recognized = conf >= threshold
             result = pred if is_recognized else "Objek Tidak Dikenali"
 
-            st.markdown(f"<div class='result-box'><strong>Jenis Beras:</strong> {result}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='result-box'><strong>Jenis Beras:</strong> {result}</div>",
+                unsafe_allow_html=True
+            )
 
             if is_recognized:
-                st.markdown(f"<div class='accuracy'><strong>Akurasi Prediksi:</strong> {conf:.2f}%</div>", unsafe_allow_html=True)
-                st.markdown("<div class='centered-text'>Distribusi Probabilitas:</div>", unsafe_allow_html=True)
+                # ganti label: Akurasi Prediksi -> Probabilitas Prediksi
+                st.markdown(
+                    f"<div class='accuracy'><strong>Kepercayaan Prediksi:</strong> {conf:.2f}%</div>",
+                    unsafe_allow_html=True
+                )
 
+                # tampilkan waktu pemrosesan dalam detik
+                st.markdown(
+                    f"<div class='accuracy'><strong>Waktu Pemrosesan:</strong> {elapsed_s:.2f} detik</div>",
+                    unsafe_allow_html=True
+                )
+
+                st.markdown("<div class='accuracy'>Distribusi Probabilitas:</div>", unsafe_allow_html=True)
+
+                # tabel probabilitas diurutkan menurun
                 st.markdown("<div class='table-wrapper'>", unsafe_allow_html=True)
-                st.dataframe(pd.DataFrame(probs.items(), columns=["Jenis Beras", "Probabilitas (%)"]), use_container_width=True)
+                df_probs = pd.DataFrame(probs.items(), columns=["Jenis Beras", "Probabilitas (%)"]) \
+                            .sort_values("Probabilitas (%)", ascending=False, ignore_index=True)
+                st.dataframe(df_probs, use_container_width=True)
                 st.markdown("</div>", unsafe_allow_html=True)  # end table-wrapper
 
         st.markdown("</div>", unsafe_allow_html=True)  # end btn-wrapper
